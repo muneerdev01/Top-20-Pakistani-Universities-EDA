@@ -2,25 +2,83 @@ import streamlit as st
 import pandas as pd
 import re
 import os
-import matplotlib.pyplot as plt
-import seaborn as sns
 
-# کلاؤڈ پر فائل کا نام
+# کلاؤڈ پر فائل کا پاتھ
 input_path = "Top_20_Pakistani_Universities.csv"
 
-# اسٹریم لٹ پیج کی سیٹنگ
-st.set_page_config(page_title="Pak Universities Quantum EDA", layout="wide")
+# 1. پیج کی کنفیگریشن اور ڈارک موڈ فورس کرنا
+st.set_page_config(
+    page_title="QUANTUM COMMAND",
+    page_icon="🚀",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
 
-st.title("🇵🇰 Top 20 Pakistani Universities - Quantum Analytics")
-st.markdown("Welcome Muneer! Use the sidebar filters to interact with the dashboard.")
+# 2. کسٹم CSS انجکشن - ہوبہو سائبر پنک گلو اور بلیک کارڈز کے لیے
+st.markdown("""
+    <style>
+    /* مین بیک گراؤنڈ ڈارک کرنا */
+    .stApp {
+        background-color: #060913;
+        color: #ffffff;
+    }
+    /* نیون گلو ہیڈنگ */
+    .quantum-header {
+        text-align: center;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 50px;
+        font-weight: bold;
+        color: #63ffb4;
+        text-shadow: 0 0 10px #63ffb4, 0 0 30px #20c997;
+        margin-bottom: 5px;
+    }
+    .quantum-subtitle {
+        text-align: center;
+        color: #8ab4f8;
+        font-size: 16px;
+        margin-bottom: 30px;
+    }
+    /* کسٹم کواڈنٹ کارڈز */
+    .university-card {
+        background-color: #0b111e;
+        border: 1px solid #1e293b;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    }
+    .card-title {
+        font-size: 16px;
+        font-weight: bold;
+        color: #ffffff;
+        margin-bottom: 2px;
+    }
+    .card-location {
+        font-size: 12px;
+        color: #a0aec0;
+        margin-bottom: 15px;
+    }
+    /* پروگریس بار لیبلز */
+    .metric-label {
+        font-size: 11px;
+        font-weight: bold;
+        letter-spacing: 1px;
+        margin-top: 8px;
+        margin-bottom: 2px;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+# 3. ہوبہو تصویر جیسی مین ہیڈنگز
+st.markdown('<div class="quantum-header">QUANTUM COMMAND</div>', unsafe_allow_html=True)
+st.markdown('<div class="quantum-subtitle">🚀 My First Dataset "University Rankings • Pakistan Sector"</div>', unsafe_allow_html=True)
 
 if not os.path.exists(input_path):
-    st.error(f"Error: Dataset not found at {input_path}.")
+    st.error(f"Error: Dataset not found at {input_path}")
 else:
-    # Data Loading
     df = pd.read_csv(input_path)
 
-    # --- Data Cleaning & Prep ---
+    # --- ڈیٹا کی صفائی اور کیلکولیشنز ---
     def parse_rank(val):
         match = re.search(r'(\d+)', str(val))
         if match:
@@ -31,7 +89,7 @@ else:
     df['Total Faculty'] = pd.to_numeric(df['Total Faculty'], errors='coerce').fillna(0)
     df['Total Students'] = pd.to_numeric(df['Total Students'], errors='coerce').fillna(1)
     
-    # --- Quantum Metrics Calculation ---
+    # فارمولے
     df['Gravity_Resistance'] = (df['Total Faculty'] / df['Total Students']) * 100
     df['Orbital_Stability'] = 700 - df['QS_Numeric']
     
@@ -39,64 +97,79 @@ else:
         if pd.isna(val) or val == '':
             return 0
         return len(str(val).split(','))
-        
     df['Innovation_Thrust'] = df['Programs Offered'].apply(count_programs)
 
-    # ----------------------------------------------------
-    # 🕹️ متحرک فلٹرز (Interactive Sidebar Filters)
-    # ----------------------------------------------------
-    st.sidebar.header("🎯 Dashboard Control Panel")
+    # --- میپ ڈیٹا میپنگ (شہروں کے کوآرڈینیٹس تصویر کے مطابق بنانے کے لیے) ---
+    coordinates = {
+        'Islamabad': [33.6844, 73.0479],
+        'Lahore, Punjab': [31.5204, 74.3587],
+        'Karachi, Sindh': [24.8607, 67.0011],
+        'Topi, Khyber Pakhtunkhwa': [34.0700, 72.6200],
+        'Faisalabad, Punjab': [31.4504, 73.1350],
+        'Peshawar, Khyber Pakhtunkhwa': [34.0151, 71.5249],
+        'Quetta, Balochistan': [30.1798, 66.9750],
+        'Jamshoro, Sindh': [25.4300, 68.2600],
+        'Islamabad (Multiple Cities)': [33.6844, 73.0479]
+    }
     
-    # لوکیشن فلٹر (Unique locations list)
-    all_locations = ["All Locations"] + list(df['Location'].unique())
-    selected_location = st.sidebar.selectbox("Filter by City / Province:", all_locations)
-    
-    # سٹوڈنٹس کی تعداد کا سلائیڈر (Slider to filter by student count)
-    min_students = int(df['Total Students'].min())
-    max_students = int(df['Total Students'].max())
-    student_range = st.sidebar.slider("Select Minimum Students:", min_students, max_students, min_students)
-
-    # ڈیٹا کو فلٹر کرنا (Filtering the DataFrame based on user inputs)
-    filtered_df = df[df['Total Students'] >= student_range]
-    if selected_location != "All Locations":
-        filtered_df = filtered_df[filtered_df['Location'] == selected_location]
+    # ریپوزٹری میں موجود لوکیشنز کے مطابق لیٹ ٹیوڈ اور لونگی ٹیوڈ سیٹ کرنا
+    df['lat'] = df['Location'].map(lambda x: coordinates.get(x, [33.6844, 73.0479])[0])
+    df['lon'] = df['Location'].map(lambda x: coordinates.get(x, [33.6844, 73.0479])[1])
 
     # ----------------------------------------------------
-    # 📊 اپڈیٹڈ ڈسپلے (Filtered Data Display)
+    # 🌍 نقشہ کا سیکشن (نقشہ تصویر 1 کی طرح ڈارک موڈ پر چلے گا)
     # ----------------------------------------------------
+    st.markdown("### 🗺️ Quantum Matrix Map")
+    # اسٹریم لٹ کا بلٹ ان میپ جو کہ خود بخود ہری لائٹس دکھائے گا
+    st.map(df, latitude='lat', longitude='lon', size=20, color='#63ffb4')
+
+    # 🔍 سرچ بار جو تصویر کے نیچے لگی ہے
+    search_query = st.text_input("🔍 Search Quantum Coordinates (Name or City)...", "")
     
-    # 1. Dynamic Metrics Cards
-    col1, col2, col3 = st.columns(3)
-    col1.metric("Filtered Universities", len(filtered_df))
-    col2.metric("Avg. Gravity Resistance", f"{filtered_df['Gravity_Resistance'].mean():.2f}%" if len(filtered_df)>0 else "0%")
-    col3.metric("Top Innovation Thrust", int(filtered_df['Innovation_Thrust'].max()) if len(filtered_df)>0 else 0)
-
-    st.markdown("---")
-
-    # 2. Data Table (User can sort by clicking column headers)
-    st.subheader("📊 Quantum Metrics Dataset (Click column headers to sort!)")
-    st.dataframe(filtered_df[['University Name', 'Gravity_Resistance', 'Orbital_Stability', 'Innovation_Thrust', 'Location', 'Total Students']])
-
-    st.markdown("---")
-
-    # 3. Dynamic Charts Section
-    st.subheader("📈 Visual Insights")
-    
-    if len(filtered_df) > 0:
-        chart_col1, chart_col2 = st.columns(2)
-
-        with chart_col1:
-            st.write(f"**Innovation Thrust ({selected_location})**")
-            fig, ax = plt.subplots()
-            # Show top 10 from the filtered list
-            sns.barplot(data=filtered_df.head(10), x='Innovation_Thrust', y='University Name', ax=ax, palette="viridis")
-            plt.xticks(rotation=0)
-            st.pyplot(fig)
-
-        with chart_col2:
-            st.write("**Gravity Resistance vs Orbital Stability**")
-            fig2, ax2 = plt.subplots()
-            sns.scatterplot(data=filtered_df, x='Gravity_Resistance', y='Orbital_Stability', hue='Location', size='Total Students', ax=ax2, sizes=(40, 400))
-            st.pyplot(fig2)
+    if search_query:
+        filtered_df = df[df['University Name'].str.contains(search_query, case=False) | df['Location'].str.contains(search_query, case=False)]
     else:
-        st.warning("No universities match the selected criteria. Try adjusting the filters in the sidebar!")
+        filtered_df = df
+
+    st.markdown("<br><br>", unsafe_allow_html=True)
+
+    # ----------------------------------------------------
+    # 🗂️ گرڈ اور پروگریس کارڈز (تصویر 2 کے مطابق ہوبہو 3 کالم ڈیزائن)
+    # ----------------------------------------------------
+    st.markdown("### 📊 Quantum Coordinates Grid")
+    
+    # 3 کالمز کا لوپ چلانا تاکہ ہوبہو کارڈ گریڈ بنے
+    cols = st.columns(3)
+    
+    for idx, row in filtered_df.iterrows():
+        col_selector = idx % 3
+        with cols[col_selector]:
+            # کسٹم ایچ ٹی ایم ایل کارڈ بنانا
+            st.markdown(f"""
+                <div class="university-card">
+                    <div style="float: right; background-color: #1e293b; padding: 2px 6px; border-radius: 4px; font-size: 10px; color: #63ffb4; font-weight: bold;">
+                        R- {row['QS_Numeric']}
+                    </div>
+                    <div class="card-title">{row['University Name']}</div>
+                    <div class="card-location">📍 {row['Location']}</div>
+                </div>
+            """, unsafe_allow_html=True)
+            
+            # ہر کارڈ کے اندر کی پروگریس بارز اور ڈیٹا
+            # 1. Gravity Resistance
+            st.markdown(f'<div class="metric-label" style="color: #00d2ff;">⚡ GRAVITY RES. <span style="float:right;">{row['Gravity_Resistance']:.1f}%</span></div>', unsafe_allow_html=True)
+            # پروگریس بار کی ویلیو 0 اور 1 کے درمیان ہونی چاہیے، اسے نارملائز کر رہے ہیں
+            grav_val = min(float(row['Gravity_Resistance']) / 20.0, 1.0) 
+            st.progress(grav_val)
+            
+            # 2. Orbital Stability
+            st.markdown(f'<div class="metric-label" style="color: #63ffb4;">✨ ORB. STABILITY <span style="float:right;">{int(row['Orbital_Stability'])}</span></div>', unsafe_allow_html=True)
+            orb_val = min(float(row['Orbital_Stability']) / 700.0, 1.0)
+            st.progress(orb_val)
+            
+            # 3. Innovation Thrust
+            st.markdown(f'<div class="metric-label" style="color: #b76eff;">🚀 THRUST <span style="float:right;">{int(row['Innovation_Thrust'])}</span></div>', unsafe_allow_html=True)
+            thrust_val = min(float(row['Innovation_Thrust']) / 10.0, 1.0)
+            st.progress(thrust_val)
+            
+            st.markdown("<br>", unsafe_allow_html=True)
