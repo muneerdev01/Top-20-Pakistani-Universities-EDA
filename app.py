@@ -69,7 +69,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 3. ہوبہو تصویر جیسی مین ہیڈنگز
+# 3. مین ہیڈنگز
 st.markdown('<div class="quantum-header">QUANTUM COMMAND</div>', unsafe_allow_html=True)
 st.markdown('<div class="quantum-subtitle">🚀 My First Dataset "University Rankings • Pakistan Sector"</div>', unsafe_allow_html=True)
 
@@ -99,7 +99,7 @@ else:
         return len(str(val).split(','))
     df['Innovation_Thrust'] = df['Programs Offered'].apply(count_programs)
 
-    # --- میپ ڈیٹا میپنگ (شہروں کے کوآرڈینیٹس تصویر کے مطابق بنانے کے لیے) ---
+    # --- میپ ڈیٹا میپنگ ---
     coordinates = {
         'Islamabad': [33.6844, 73.0479],
         'Lahore, Punjab': [31.5204, 74.3587],
@@ -112,18 +112,16 @@ else:
         'Islamabad (Multiple Cities)': [33.6844, 73.0479]
     }
     
-    # ریپوزٹری میں موجود لوکیشنز کے مطابق لیٹ ٹیوڈ اور لونگی ٹیوڈ سیٹ کرنا
     df['lat'] = df['Location'].map(lambda x: coordinates.get(x, [33.6844, 73.0479])[0])
     df['lon'] = df['Location'].map(lambda x: coordinates.get(x, [33.6844, 73.0479])[1])
 
     # ----------------------------------------------------
-    # 🌍 نقشہ کا سیکشن (نقشہ تصویر 1 کی طرح ڈارک موڈ پر چلے گا)
+    # 🌍 نقشہ کا سیکشن
     # ----------------------------------------------------
     st.markdown("### 🗺️ Quantum Matrix Map")
-    # اسٹریم لٹ کا بلٹ ان میپ جو کہ خود بخود ہری لائٹس دکھائے گا
     st.map(df, latitude='lat', longitude='lon', size=20, color='#63ffb4')
 
-    # 🔍 سرچ بار جو تصویر کے نیچے لگی ہے
+    # 🔍 سرچ بار
     search_query = st.text_input("🔍 Search Quantum Coordinates (Name or City)...", "")
     
     if search_query:
@@ -134,42 +132,42 @@ else:
     st.markdown("<br><br>", unsafe_allow_html=True)
 
     # ----------------------------------------------------
-    # 🗂️ گرڈ اور پروگریس کارڈز (تصویر 2 کے مطابق ہوبہو 3 کالم ڈیزائن)
+    # 🗂️ گرڈ اور پروگریس کارڈز (فکسڈ سنٹیکس کے ساتھ)
     # ----------------------------------------------------
     st.markdown("### 📊 Quantum Coordinates Grid")
     
-    # 3 کالمز کا لوپ چلانا تاکہ ہوبہو کارڈ گریڈ بنے
     cols = st.columns(3)
     
-    for idx, row in filtered_df.iterrows():
+    for idx, row in filtered_df.reset_index(drop=True).iterrows():
         col_selector = idx % 3
         with cols[col_selector]:
-            # کسٹم ایچ ٹی ایم ایل کارڈ بنانا
+            # کارڈ کا بیرونی ڈھانچہ
             st.markdown(f"""
                 <div class="university-card">
                     <div style="float: right; background-color: #1e293b; padding: 2px 6px; border-radius: 4px; font-size: 10px; color: #63ffb4; font-weight: bold;">
-                        R- {row['QS_Numeric']}
+                        R- {row["QS_Numeric"]}
                     </div>
-                    <div class="card-title">{row['University Name']}</div>
-                    <div class="card-location">📍 {row['Location']}</div>
+                    <div class="card-title">{row["University Name"]}</div>
+                    <div class="card-location">📍 {row["Location"]}</div>
                 </div>
             """, unsafe_allow_html=True)
             
-            # ہر کارڈ کے اندر کی پروگریس بارز اور ڈیٹا
-            # 1. Gravity Resistance
-            st.markdown(f'<div class="metric-label" style="color: #00d2ff;">⚡ GRAVITY RES. <span style="float:right;">{row['Gravity_Resistance']:.1f}%</span></div>', unsafe_allow_html=True)
-            # پروگریس بار کی ویلیو 0 اور 1 کے درمیان ہونی چاہیے، اسے نارملائز کر رہے ہیں
-            grav_val = min(float(row['Gravity_Resistance']) / 20.0, 1.0) 
+            # 1. Gravity Resistance (اندر اب ڈبل کوٹس استعمال کیے ہیں تاکہ ایرر نہ آئے)
+            grav_text = f'{row["Gravity_Resistance"]:.1f}%'
+            st.markdown(f'<div class="metric-label" style="color: #00d2ff;">⚡ GRAVITY RES. <span style="float:right;">{grav_text}</span></div>', unsafe_allow_html=True)
+            grav_val = min(float(row["Gravity_Resistance"]) / 20.0, 1.0) 
             st.progress(grav_val)
             
             # 2. Orbital Stability
-            st.markdown(f'<div class="metric-label" style="color: #63ffb4;">✨ ORB. STABILITY <span style="float:right;">{int(row['Orbital_Stability'])}</span></div>', unsafe_allow_html=True)
-            orb_val = min(float(row['Orbital_Stability']) / 700.0, 1.0)
+            orb_text = f'{int(row["Orbital_Stability"])}'
+            st.markdown(f'<div class="metric-label" style="color: #63ffb4;">✨ ORB. STABILITY <span style="float:right;">{orb_text}</span></div>', unsafe_allow_html=True)
+            orb_val = min(float(row["Orbital_Stability"]) / 700.0, 1.0)
             st.progress(orb_val)
             
             # 3. Innovation Thrust
-            st.markdown(f'<div class="metric-label" style="color: #b76eff;">🚀 THRUST <span style="float:right;">{int(row['Innovation_Thrust'])}</span></div>', unsafe_allow_html=True)
-            thrust_val = min(float(row['Innovation_Thrust']) / 10.0, 1.0)
+            thrust_text = f'{int(row["Innovation_Thrust"])}'
+            st.markdown(f'<div class="metric-label" style="color: #b76eff;">🚀 THRUST <span style="float:right;">{thrust_text}</span></div>', unsafe_allow_html=True)
+            thrust_val = min(float(row["Innovation_Thrust"]) / 10.0, 1.0)
             st.progress(thrust_val)
             
             st.markdown("<br>", unsafe_allow_html=True)
