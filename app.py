@@ -8,7 +8,7 @@ input_path = "Top_20_Pakistani_Universities.csv"
 
 # 1. پیج کی کنفیگریشن اور ڈارک موڈ فورس کرنا
 st.set_page_config(
-    page_title="QUANTUM COMMAND",
+    page_title="Top-20-Pakistani-Universities-EDA",
     page_icon="🚀",
     layout="wide",
     initial_sidebar_state="collapsed"
@@ -70,8 +70,8 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # 3. مین ہیڈنگز
-st.markdown('<div class="quantum-header">QUANTUM COMMAND</div>', unsafe_allow_html=True)
-st.markdown('<div class="quantum-subtitle">🚀 My First Dataset "University Rankings • Pakistan Sector"</div>', unsafe_allow_html=True)
+st.markdown('<div class="quantum-header">Top-20-Pakistani-Universities-EDA</div>', unsafe_allow_html=True)
+st.markdown('<div class="Top-20-Pakistani-Universities-EDA">🚀 My First Dataset "University Rankings • Pakistan Sector"</div>', unsafe_allow_html=True)
 
 if not os.path.exists(input_path):
     st.error(f"Error: Dataset not found at {input_path}")
